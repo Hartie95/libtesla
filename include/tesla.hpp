@@ -122,7 +122,7 @@ namespace tsl {
             constexpr Color ColorHandle           = { 0x5, 0x5, 0x5, 0xF };   ///< Track bar handle color
             constexpr Color ColorText             = { 0xF, 0xF, 0xF, 0xF };   ///< Standard text color
             constexpr Color ColorDescription      = { 0xA, 0xA, 0xA, 0xF };   ///< Description text color
-            constexpr Color ColorHeaderBar        = { 0xC, 0xC, 0xC, 0xF };   ///< Category header rectangle color
+            constexpr Color ColorHeaderBar        = { 0xA, 0xA, 0xA, 0xF };   ///< Category header rectangle color
             constexpr Color ColorClickAnimation   = { 0x0, 0x2, 0x2, 0xF };   ///< Element click animation color
         }
     }
@@ -711,6 +711,42 @@ namespace tsl {
                         }
                     }
                 }
+            }
+// TODO MY
+            inline void drawRectRounded(s16 x, s16 y, s16 w, s16 h, Color color) {
+                int cornersize = 2;
+                int xCornerL = x+cornersize;
+                int xCornerR = x+w-cornersize-1;
+                int yCornerU = y+cornersize;
+                int yCornerD = y+h-cornersize-1;
+
+                for (s16 x1 = x; x1 < (x + w); x1++)
+                    for (s16 y1 = y; y1 < (y + h); y1++){
+                        if((x1>=xCornerL && x1<xCornerR)){
+                            this->setPixelBlendDst(x1, y1, color);
+                        } else {
+                            if(y1>=yCornerU&&y1<yCornerD){
+                                this->setPixelBlendDst(x1, y1, color);
+                            }
+                        }
+                    }
+                this->setPixelBlendDst(x+2, y, color);
+                this->setPixelBlendDst(xCornerR, y, color);
+
+                this->setPixelBlendDst(x+1, y+1, color);
+                this->setPixelBlendDst(x+2, y+1, color);
+                this->setPixelBlendDst(xCornerR, y+1, color);
+                this->setPixelBlendDst(xCornerR+1, y+1, color);
+
+                this->setPixelBlendDst(x+2, yCornerD+1, color);
+                this->setPixelBlendDst(xCornerR, yCornerD+1, color);
+                
+                this->setPixelBlendDst(x+1, yCornerD, color);
+                this->setPixelBlendDst(x+2, yCornerD, color);
+                this->setPixelBlendDst(xCornerR, yCornerD, color);
+                this->setPixelBlendDst(xCornerR+1, yCornerD, color);
+                
+
             }
 
             /**
@@ -1321,8 +1357,8 @@ namespace tsl {
                 static float counter = 0;
                 const float progress = (std::sin(counter) + 1) / 2;
                 Color highlightColor = {   static_cast<u8>((0x2 - 0x8) * progress + 0x8),
-                                                static_cast<u8>((0x8 - 0xF) * progress + 0xF),
-                                                static_cast<u8>((0xC - 0xF) * progress + 0xF),
+                                                static_cast<u8>((0xA - 0xF) * progress + 0xF), 
+                                                static_cast<u8>((0xA - 0xF) * progress + 0xF), 
                                                 0xF };
 
                 counter += 0.1F;
@@ -1358,11 +1394,16 @@ namespace tsl {
                     }
                 }
 
-                renderer->drawRect(this->getX() + x - 4, this->getY() + y - 4, this->getWidth() + 8, 4, a(highlightColor));
+                /*renderer->drawRect(this->getX() + x - 4, this->getY() + y - 4, this->getWidth() + 8, 4, a(highlightColor));
                 renderer->drawRect(this->getX() + x - 4, this->getY() + y + this->getHeight(), this->getWidth() + 8, 4, a(highlightColor));
                 renderer->drawRect(this->getX() + x - 4, this->getY() + y, 4, this->getHeight(), a(highlightColor));
-                renderer->drawRect(this->getX() + x + this->getWidth(), this->getY() + y, 4, this->getHeight(), a(highlightColor));
+                renderer->drawRect(this->getX() + x + this->getWidth(), this->getY() + y, 4, this->getHeight(), a(highlightColor));*/
 
+                // TODO MY
+                renderer->drawRectRounded(this->m_x + x - 5, this->m_y + y - 5, this->m_width + 8, 5, a(highlightColor));
+                renderer->drawRectRounded(this->m_x + x - 5, this->m_y + y + this->m_height, this->m_width + 8, 5, a(highlightColor));
+                renderer->drawRectRounded(this->m_x + x - 5, this->m_y + y-4, 5, this->m_height+8, a(highlightColor));
+                renderer->drawRectRounded(this->m_x + x + this->m_width, this->m_y + y-4, 5, this->m_height+8, a(highlightColor));
             }
 
             /**
@@ -1647,6 +1688,7 @@ namespace tsl {
                 renderer->drawRect(15, tsl::cfg::FramebufferHeight - 73, tsl::cfg::FramebufferWidth - 30, 1, a(tsl::style::color::ColorText));
 
                 renderer->drawString("\uE0E1  Back     \uE0E0  OK", false, 30, 693, 23, a(tsl::style::color::ColorText));
+                
 
                 if (this->m_header != nullptr)
                     this->m_header->frame(renderer);
@@ -2330,8 +2372,8 @@ namespace tsl {
             virtual ~CategoryHeader() {}
 
             virtual void draw(gfx::Renderer *renderer) override {
-                renderer->drawRect(this->getX() - 2, this->getBottomBound() - 30, 5, 23, a(tsl::style::color::ColorHeaderBar));
-                renderer->drawString(this->m_text.c_str(), false, this->getX() + 13, this->getBottomBound() - 12, 15, a(tsl::style::color::ColorText));
+                renderer->drawRect(this->getX() - 2, this->getBottomBound() - 34, 5, 24, a(tsl::style::color::ColorHeaderBar));
+                renderer->drawString(this->m_text.c_str(), false, this->getX() + 20, this->getBottomBound() - 12, 20, a(tsl::style::color::ColorText));
 
                 if (this->m_hasSeparator)
                     renderer->drawRect(this->getX(), this->getBottomBound(), this->getWidth(), 1, a(tsl::style::color::ColorFrame));
